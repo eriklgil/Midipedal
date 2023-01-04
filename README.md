@@ -1,5 +1,8 @@
 # Bluetooth Midipedal
 
+![Midiped](https://user-images.githubusercontent.com/113515048/210634599-3aa5f8a9-1be0-4803-be57-67b94b3abbe9.jpeg)
+
+
 This is a code that run midi commands from an esp and send over to computer through bluetooth communication.
 
 ### You will need these libraries:
