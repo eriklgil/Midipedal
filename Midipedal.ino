@@ -380,10 +380,11 @@ void ButtonChannel(){
 
 //BatteryStatus calculates batteryvoltage. This calculation is done by adding som fixed reference values, and including expected values from voltagedivider.
 // Litiumbatteries should not be drained below 3 volt, else the battery might be permanent damaged.
+//batVoltage equation was found on this page: https://github.com/Xinyuan-LilyGO/TTGO-T-Display/blob/master/TFT_eSPI/examples/FactoryTest/FactoryTest.ino 
 float BatteryStatus() {
   int vref = 1100;
   float batValue = analogRead(BatvoltagePin);
-  float batVoltage = (batValue/4095.0)*2.0*3.3*(vref/1000.0);
+  float batVoltage = (batValue/4095.0)*2.0*3.3*(vref/1000.0);   
   return batVoltage;
 }
 
