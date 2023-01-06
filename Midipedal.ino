@@ -492,21 +492,20 @@ void screenPandC(){
 
 //screenBat displays batteryvoltage and uses batteryprosent to indicate the remaining batterylevel. Left is used as a variable to fill a drawn rounded rectangle.
 void screenBat(){
-  float batVoltage = BatteryStatus();
   if(millis() - voltageTime > 10000){
     Batmilli = BatteryStatus();
     voltageTime = millis();
   }
   
-  if (batVoltage > 4.05) {      // 4,05 volt
+  if (Batmilli > 4.05) {      // 4,05 volt
     left = 1;
     }
   
-  else if (batVoltage > 3.7){  // 3,7 volt
+  else if (Batmilli > 3.7){  // 3,7 volt
       left = 0.75;
     }
   
-  else if (batVoltage > 3.42){  //3,42 volt
+  else if (Batmilli > 3.42){  //3,42 volt
       left = 0.50;
     }
     
