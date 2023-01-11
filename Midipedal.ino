@@ -10,7 +10,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH1106.h>
 
-BLEMIDI_CREATE_INSTANCE("Ultimate MidiPedal", MIDI)      //uncomment and run once for adding a custom name on bluetooth device.
+BLEMIDI_CREATE_INSTANCE("Ultimate MidiPedal", MIDI)      //uncomment for adding a custom name on bluetooth device.
 
 
 // For T18 v3.0 These GPIO is used for display control
