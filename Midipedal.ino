@@ -10,7 +10,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH1106.h>
 
-BLEMIDI_CREATE_INSTANCE("EnterdeviceName", MIDI)      //uncomment and run once for adding a custom name on bluetooth device.
+BLEMIDI_CREATE_INSTANCE("Ultimate MidiPedal", MIDI)      //uncomment and run once for adding a custom name on bluetooth device.
 
 
 // For T18 v3.0 These GPIO is used for display control
@@ -34,7 +34,8 @@ int program = 0;
 int channel = 0;
 int LastPot1;
 int LastPot2;
-int lastChannel;
+int Potreset;
+int lastChannel = 0;
 float left;
 int cc[2] = {101, 102};
 
@@ -51,7 +52,6 @@ const int Potpin1 = 33;
 const int Potpin2 = 34;
 const int BatvoltagePin = 35;
 const int DelayTime = 50;
-const int ButtonDelay = 300;
 
 // This lines includes debounce for every button connected.
 Debounce Button1(Button_1, DelayTime, true);
@@ -319,6 +319,7 @@ void PotensiometerMain(){
 
 //ButtonProgram will read buttons used for program switching. A 500 ms delay time is set to stop unit from sending a lot of messages to the computer. This delay can be adjusted if prosess works to slow.
 void ButtonProgram(){
+  const int ButtonDelay = 300;
   unsigned long buttonTime = millis();
 
   if(Button5.read() == true || Button6.read() == true){           //when program buttons are pushed, channels are reset.
@@ -347,44 +348,52 @@ void ButtonProgram(){
 //ButtonChannel will read buttons used for channel switching. A 500 ms delay time is set to stop unit from sending a lot of messages to the computer. This delay can be adjusted if prosess works to slow.
 void ButtonChannel(){
   unsigned long buttonTime = millis();
+  const int laststateDelay = 200;
   
-  if(Button1.read() == true  && (buttonTime - lastbuttonTime) > ButtonDelay  ) {
+  if(Button1.read() == true  && lastChannel == 0) {
     channel = 1;
     BLEMidiServer.programChange(program, channel);
     lastChannel = channel;
     lastbuttonTime = buttonTime; 
+    Serial.print(1);
   }
 
-  if(Button2.read() == true  && (buttonTime - lastbuttonTime) > ButtonDelay  ) {
+  if(Button2.read() == true  && lastChannel == 0) {
     channel = 2;
     BLEMidiServer.programChange(program, channel);
     lastChannel = channel;
     lastbuttonTime = buttonTime; 
+    Serial.print(2);
   }
 
-  if(Button3.read() == true  && (buttonTime - lastbuttonTime) > ButtonDelay  ) {
+  if(Button3.read() == true  && lastChannel == 0) {
     channel = 3;
     BLEMidiServer.programChange(program, channel);
     lastChannel = channel;
     lastbuttonTime = buttonTime; 
+    Serial.print(3);
   }
 
-  if(Button4.read() == true  && (buttonTime - lastbuttonTime) > ButtonDelay  ) {
+  if(Button4.read() == true  && lastChannel == 0) {
     channel = 4;
     BLEMidiServer.programChange(program, channel);
     lastChannel = channel;
     lastbuttonTime = buttonTime; 
+    Serial.print(4);
   } 
+
+  if(buttonTime - lastbuttonTime > laststateDelay){
+    lastChannel = 0;
+  }
 }
 
 
 //BatteryStatus calculates batteryvoltage. This calculation is done by adding som fixed reference values, and including expected values from voltagedivider.
 // Litiumbatteries should not be drained below 3 volt, else the battery might be permanent damaged.
-//batVoltage equation was found on this page: https://github.com/Xinyuan-LilyGO/TTGO-T-Display/blob/master/TFT_eSPI/examples/FactoryTest/FactoryTest.ino 
 float BatteryStatus() {
   int vref = 1100;
   float batValue = analogRead(BatvoltagePin);
-  float batVoltage = (batValue/4095.0)*2.0*3.3*(vref/1000.0);   
+  float batVoltage = (batValue/4095.0)*2.0*3.3*(vref/1000.0);
   return batVoltage;
 }
 
@@ -393,10 +402,10 @@ float BatteryStatus() {
 void PotensioMeters(int PotensioMeter1, int PotensioMeter2) {
   
   
-  if(lastChannel != 0) {                //When channel is switched, potentiometers will not change value on this channel.
+  if(Potreset != 0) {                //When channel is switched, potentiometers will not change value on this channel.
     PotensioMeter1 = LastPot1;
     PotensioMeter2 = LastPot2;
-    lastChannel = 0;  
+    Potreset = 0;  
   }
   unsigned long tid = millis();
   if(tid - potTime > 50) {
@@ -417,7 +426,6 @@ void PotensioMeters(int PotensioMeter1, int PotensioMeter2) {
 //Pot1 & Pot2 reads value from potentiometers and give them the right values on a scale between 0 and 127.
 int Pot1(){
   int Pot1 = analogRead(Potpin1);
-  Serial.print(Pot1);
   int PotensioMeter1 = map(Pot1, 4095, 0, 127, 0);
   return PotensioMeter1; 
 }
@@ -492,6 +500,7 @@ void screenPandC(){
 
 //screenBat displays batteryvoltage and uses batteryprosent to indicate the remaining batterylevel. Left is used as a variable to fill a drawn rounded rectangle.
 void screenBat(){
+  //float batVoltage = BatteryStatus();
   if(millis() - voltageTime > 10000){
     Batmilli = BatteryStatus();
     voltageTime = millis();
